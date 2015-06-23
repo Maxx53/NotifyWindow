@@ -118,7 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="textBox1.Text" xml:space="preserve">
-    <value>API Sets are strongly named API contracts that provide architectural separation between an API contract and the associated host (DLL) implementation. API Sets rely on operating system support in the library loader to effectively introduce a namespace redirection component to the library binding process. Subject to various inputs, including the API Set name and the binding (import) context, the library loader performs a runtime redirection of the reference to a target host binary that houses the appropriate implementation of the API Set.</value>
+    <value>{\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil\fcharset0 Comic Sans MS;}}
+{\colortbl ;\red230\green0\blue0;\red0\green176\blue80;\red0\green0\blue255;}
+{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\sa200\sl276\slmult1\qc\lang9\f0\fs22  \b Hi, this is RTF demo for \cf1\fs28 Notify Window\cf0\b0\fs22 . \line\i Italic \line\ul\i0 Underline\line\cf2\ulnone\f1\fs72 Have fun!\par
+\cf0\f0\fs22 visit {\field{\*\fldinst{HYPERLINK "http://maxx53.ru"}}{\fldrslt{\ul\cf3 http://maxx53.ru}}}\f0\fs22\par</value>
   </data>
   <metadata name="notifyWindow1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>

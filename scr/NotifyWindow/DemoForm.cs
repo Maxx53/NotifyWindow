@@ -12,7 +12,7 @@ namespace maxx53.tools
 
         private void button1_Click(object sender, EventArgs e)
         {
-            notifyWindow1.Show(textBox1.Text);
+            notifyWindow1.Show(textBox1.Text, true);
         }
 
 

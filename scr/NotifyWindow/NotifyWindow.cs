@@ -13,22 +13,79 @@ namespace maxx53.tools
         #region PopupForm Class
         public class PopupForm : Form
         {
+            #region Custom RichTextBox Class
+            public class RichTextLabel : RichTextBox
+            {
+                public RichTextLabel()
+                {
+                    base.ReadOnly = true;
+                    base.BorderStyle = BorderStyle.None;
+                    base.TabStop = false;
+                    base.SetStyle(ControlStyles.Selectable, false);
+                    this.SetStyle(ControlStyles.Opaque, true);
+                    this.SetStyle(ControlStyles.OptimizedDoubleBuffer, false);
+
+                    base.MouseEnter += delegate(object sender, EventArgs e)
+                    {
+                        this.Cursor = Cursors.Default;
+                    };
+                }
+
+                const int WM_SETFOCUS = 0x0007;
+                const int WM_KILLFOCUS = 0x0008;
+
+                protected override void WndProc(ref Message m)
+                {
+                    if (m.Msg == WM_SETFOCUS) m.Msg = WM_KILLFOCUS;
+
+                    base.WndProc(ref m);
+                }
+
+                protected override CreateParams CreateParams
+                {
+                    get
+                    {
+                        CreateParams parms = base.CreateParams;
+                        parms.ExStyle |= 0x20;  // Turn on WS_EX_TRANSPARENT
+                        return parms;
+                    }
+                }
+
+                public void ForceRefresh()
+                {
+                    this.UpdateStyles();
+                }
+
+            }
+            #endregion
 
             private Timer OpenAnimTimer = new Timer();
             private Timer CloseAnimTimer = new Timer();
 
             private Timer LiveTimer = new Timer();
-            private Label label1 = new Label();
+            private RichTextLabel label = new RichTextLabel();
 
             public string LabelText
             {
                 get
                 {
-                    return label1.Text;
+                    return label.Text;
                 }
                 set
                 {
-                    label1.Text = value;
+                    label.Text = value;
+                }
+            }
+
+            public string LabelRTF
+            {
+                get
+                {
+                    return label.Rtf;
+                }
+                set
+                {
+                    label.Rtf = value;
                 }
             }
             public static int Time = 2000;
@@ -53,28 +110,34 @@ namespace maxx53.tools
                 this.CloseAnimTimer.Tick += new System.EventHandler(this.CloseAnimTimer_Tick);
 
                 this.BackColor = System.Drawing.Color.Lime;
-                this.Controls.Add(this.label1);
+                this.Controls.Add(this.label);
                 this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
                 this.Name = "PopupForm";
                 this.ShowInTaskbar = false;
                 this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
                 this.Text = "popupForm";
                 this.TransparencyKey = System.Drawing.Color.Lime;
+                this.TopMost = true;
                 this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PopupForm_FormClosing);
                 this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PopupForm_MouseClick);
-                this.label1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PopupForm_MouseClick);     
+                this.label.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PopupForm_MouseClick);
+                this.label.LinkClicked += new LinkClickedEventHandler(this.label_LinkClicked);
+
+                this.label.Location = new System.Drawing.Point(12, 10);
+                this.label.Name = "label";
+
 
                 if (_backImage != null)
                 {
                     this.BackgroundImage = _backImage;
                     this.ClientSize = _backImage.Size;
-                    this.label1.MaximumSize = _backImage.Size;
+                    this.label.Size = new Size(_backImage.Size.Width - 24, _backImage.Size.Height - 20);
                 }
                 else
                 {
                     this.ClientSize = new System.Drawing.Size(310, 229);
                     this.BackgroundImage = DrawFilledRectangle(this.ClientSize);
-                    this.label1.MaximumSize = this.ClientSize;
+                    this.label.Size = new Size(this.ClientSize.Width - 24, this.ClientSize.Height - 20);
 
                 }
 
@@ -82,10 +145,7 @@ namespace maxx53.tools
                 AnimStep = this.Height / AnimSpeed;
                 OpacStep = 1.0 / AnimSpeed;
 
-                this.label1.AutoSize = true;
-                this.label1.BackColor = System.Drawing.Color.Transparent;
-                this.label1.Location = new System.Drawing.Point(12, 10);
-                this.label1.Name = "label1";
+
 
             }
 
@@ -155,12 +215,18 @@ namespace maxx53.tools
                 e.Cancel = true;
             }
 
+            private void label_LinkClicked(object sender, LinkClickedEventArgs e)
+            {
+                System.Diagnostics.Process.Start(e.LinkText);
+            }
+
             private void PopupForm_MouseClick(object sender, MouseEventArgs e)
             {
                 if (e.Button == System.Windows.Forms.MouseButtons.Right)
                 {
                     this.Close();
                 }
+
             }
 
 
@@ -249,7 +315,7 @@ namespace maxx53.tools
             }
         }
 
-        public void Show(string text)
+        public void Show(string text, bool isRTF)
         {
             int pos = 0;
 
@@ -263,7 +329,12 @@ namespace maxx53.tools
             }
 
             pfArr[pos].resetForm();
-            pfArr[pos].LabelText = "FormID - " + pos.ToString() + Environment.NewLine + text;
+
+            if (isRTF)
+                pfArr[pos].LabelRTF = text;
+            else
+                pfArr[pos].LabelText = text;
+
             pfArr[pos].Show();
 
         }
