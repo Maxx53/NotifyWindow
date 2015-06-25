@@ -9,7 +9,6 @@ namespace maxx53.tools
     [ToolboxBitmap(typeof(Form))]
     public class NotifyWindow : Component
     {
-
         #region PopupForm Class
         public class PopupForm : Form
         {
@@ -63,7 +62,8 @@ namespace maxx53.tools
             private Timer CloseAnimTimer = new Timer();
 
             private Timer LiveTimer = new Timer();
-            private RichTextLabel label = new RichTextLabel();
+           
+            public RichTextLabel label = new RichTextLabel();
 
             public string LabelText
             {
@@ -96,7 +96,7 @@ namespace maxx53.tools
             private int formY = 0;
             
 
-            public PopupForm(Image _backImage, int pos)
+            public PopupForm(Image _backImage, int pos, MouseEventHandler mouseDown)
             {
                 //Init
                 this.OpenAnimTimer.Interval = 16;
@@ -119,8 +119,9 @@ namespace maxx53.tools
                 this.TransparencyKey = System.Drawing.Color.Lime;
                 this.TopMost = true;
                 this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PopupForm_FormClosing);
-                this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PopupForm_MouseClick);
-                this.label.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PopupForm_MouseClick);
+                this.MouseDown += mouseDown;
+
+                this.label.MouseDown += mouseDown;
                 this.label.LinkClicked += new LinkClickedEventHandler(this.label_LinkClicked);
 
                 this.label.Location = new System.Drawing.Point(12, 10);
@@ -219,17 +220,6 @@ namespace maxx53.tools
             {
                 System.Diagnostics.Process.Start(e.LinkText);
             }
-
-            private void PopupForm_MouseClick(object sender, MouseEventArgs e)
-            {
-                if (e.Button == System.Windows.Forms.MouseButtons.Right)
-                {
-                    this.Close();
-                }
-
-            }
-
-
         }
         #endregion
 
@@ -291,12 +281,27 @@ namespace maxx53.tools
                 //set image
                 for (int i = 0; i < _maxCount; i++)
                 {
-                    pfArr[i] = new PopupForm(_backImage, i);
+                    pfArr[i] = new PopupForm(_backImage, i, _OnMouseDown);
                 }
             }
         }
 
         #endregion
+
+        private MouseEventHandler _OnMouseDown;
+        public event MouseEventHandler OnMouseDown
+        {
+            add
+            {
+                _OnMouseDown += value;
+                InitForms();
+            }
+            remove
+            {
+                _OnMouseDown -= value;
+                InitForms();
+            }
+        }
 
         private PopupForm[] pfArr;
 
@@ -311,7 +316,7 @@ namespace maxx53.tools
 
             for (int i = 0; i < _maxCount; i++)
             {
-                pfArr[i] = new PopupForm(_backImage, i);
+                pfArr[i] = new PopupForm(_backImage, i, _OnMouseDown);
             }
         }
 
