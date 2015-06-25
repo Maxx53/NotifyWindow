@@ -20,6 +20,5 @@ namespace maxx53.tools
             MessageBox.Show("Button: " + e.Button.ToString() + Environment.NewLine + "Position: " + e.Location.ToString(), "Handle your mouse downs!", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-
     }
 }

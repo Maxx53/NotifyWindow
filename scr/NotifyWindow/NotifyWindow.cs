@@ -88,45 +88,51 @@ namespace maxx53.tools
                     label.Rtf = value;
                 }
             }
+
+
             public static int Time = 2000;
             public static int AnimSpeed = 5;
+            public static int Transparency = 100;
 
+            private const int frameDelay = 16;
             private static int AnimStep = 0;
             private double OpacStep =.1;
+            private double OpacLevel = 1.0;
             private int formY = 0;
+
             
 
-            public PopupForm(Image _backImage, int pos, MouseEventHandler mouseDown)
+            public PopupForm()
             {
-                //Init
-                this.OpenAnimTimer.Interval = 16;
+                //Create
+
+                this.OpenAnimTimer.Interval = frameDelay;
                 this.OpenAnimTimer.Tick += new System.EventHandler(this.OpenAnimTimer_Tick);
 
                 this.LiveTimer.Interval = Time;
                 this.LiveTimer.Tick += new System.EventHandler(this.LiveTimer_Tick);
 
-
-                this.CloseAnimTimer.Interval = 16;
+                this.CloseAnimTimer.Interval = frameDelay;
                 this.CloseAnimTimer.Tick += new System.EventHandler(this.CloseAnimTimer_Tick);
 
                 this.BackColor = System.Drawing.Color.Lime;
                 this.Controls.Add(this.label);
                 this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-                this.Name = "PopupForm";
                 this.ShowInTaskbar = false;
                 this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-                this.Text = "popupForm";
                 this.TransparencyKey = System.Drawing.Color.Lime;
                 this.TopMost = true;
                 this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PopupForm_FormClosing);
-                this.MouseDown += mouseDown;
-
-                this.label.MouseDown += mouseDown;
-                this.label.LinkClicked += new LinkClickedEventHandler(this.label_LinkClicked);
-
                 this.label.Location = new System.Drawing.Point(12, 10);
-                this.label.Name = "label";
+                this.label.LinkClicked += new LinkClickedEventHandler(this.label_LinkClicked);
+            }
 
+            public void InitForm(Image _backImage, int pos, MouseEventHandler mouseDown)
+            {
+                //Init
+
+                this.MouseDown += mouseDown;
+                this.label.MouseDown += mouseDown;
 
                 if (_backImage != null)
                 {
@@ -143,13 +149,12 @@ namespace maxx53.tools
                 }
 
                 formY = Screen.PrimaryScreen.WorkingArea.Height - this.Height - this.Height * pos;
-                AnimStep = this.Height / AnimSpeed;
-                OpacStep = 1.0 / AnimSpeed;
+                AnimStep = this.Height / (200 / AnimSpeed);
+                OpacLevel = (double)Transparency / 100;
+                OpacStep = OpacLevel / (200 / AnimSpeed);
 
-
-
+                this.Opacity = OpacLevel;
             }
-
 
             private Bitmap DrawFilledRectangle(Size size)
             {
@@ -177,8 +182,9 @@ namespace maxx53.tools
                 if (this.Location.Y <= formY)
                 {
                     this.Location = new Point(this.Location.X, formY);
-                    this.Opacity = 1;
+                    this.Opacity = OpacLevel;
                     OpenAnimTimer.Stop();
+                    LiveTimer.Start();
                 }
             }
 
@@ -196,8 +202,8 @@ namespace maxx53.tools
 
             private void LiveTimer_Tick(object sender, EventArgs e)
             {
-                CloseAnimTimer.Enabled = true;
-                LiveTimer.Enabled = false;
+                LiveTimer.Stop();
+                CloseAnimTimer.Start();
             }
 
 
@@ -205,8 +211,10 @@ namespace maxx53.tools
             {
                 this.Opacity = 0;
                 this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, formY + this.Height);
+
+                CloseAnimTimer.Enabled = false;
+                LiveTimer.Enabled = false;
                 OpenAnimTimer.Start();
-                LiveTimer.Start();
             }
 
             private void PopupForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -225,7 +233,9 @@ namespace maxx53.tools
 
         #region Properties
 
+
         private int _lifeTime = 2000;
+        [DefaultValue(2000)]
         public int LifeTime
         {
             get
@@ -236,10 +246,13 @@ namespace maxx53.tools
             {
                 _lifeTime = value;
                 PopupForm.Time = _lifeTime;
+                initialized = false;
             }
         }
 
-        private int _animSpeed = 5;
+
+        private int _animSpeed = 25;
+        [DefaultValue(25)]   
         public int AnimSpeed
         {
             get
@@ -248,12 +261,43 @@ namespace maxx53.tools
             }
             set
             {
-                _animSpeed = value;
-                PopupForm.AnimSpeed = _animSpeed;
+                if ((value <= 100) & (value > 0))
+                {
+                    _animSpeed = value;
+                    PopupForm.AnimSpeed = _animSpeed;
+                    initialized = false;
+                }
+                else
+                    MessageBox.Show("Value is out of limits.", "AnimSpeed");
             }
         }
 
+
+        private int _transparency = 100;
+        [DefaultValue(100)]
+        public int Transparency
+        {
+            get
+            {
+                return _transparency;
+            }
+            set
+            {
+                if ((value <= 100) & (value > 0))
+                {
+                    _transparency = value;
+                    PopupForm.Transparency = _transparency;
+                    initialized = false;
+                }
+                else
+                    MessageBox.Show("Value is out of limits.", "Transparency");
+
+
+            }
+        }
+ 
         private int _maxCount = 4;
+        [DefaultValue(4)]  
         public int MaxCount
         {
             get
@@ -263,11 +307,12 @@ namespace maxx53.tools
             set
             {
                 _maxCount = value;
-                InitForms();
+                initialized = false;
             }
         }
 
         private Image _backImage = null;
+        [DefaultValue(null)]  
         public Image BackImage
         {
             get
@@ -277,51 +322,45 @@ namespace maxx53.tools
             set
             {
                 _backImage = value;
-
-                //set image
-                for (int i = 0; i < _maxCount; i++)
-                {
-                    pfArr[i] = new PopupForm(_backImage, i, _OnMouseDown);
-                }
+                initialized = false;
             }
         }
 
         #endregion
 
-        private MouseEventHandler _OnMouseDown;
-        public event MouseEventHandler OnMouseDown
-        {
-            add
-            {
-                _OnMouseDown += value;
-                InitForms();
-            }
-            remove
-            {
-                _OnMouseDown -= value;
-                InitForms();
-            }
-        }
+        public event MouseEventHandler OnMouseDown;
 
         private PopupForm[] pfArr;
+        private bool initialized = false;
 
         public NotifyWindow()
         {
-            InitForms();
-        }
+            //Create forms
 
-        private void InitForms()
-        {
             pfArr = new PopupForm[_maxCount];
 
             for (int i = 0; i < _maxCount; i++)
             {
-                pfArr[i] = new PopupForm(_backImage, i, _OnMouseDown);
+                pfArr[i] = new PopupForm();
+            }
+        }
+
+        public void InitForms()
+        {
+            for (int i = 0; i < _maxCount; i++)
+            {
+                pfArr[i].InitForm(_backImage, i, OnMouseDown);
             }
         }
 
         public void Show(string text, bool isRTF)
         {
+            if (!initialized)
+            {
+                InitForms();
+                initialized = true;
+            }
+
             int pos = 0;
 
             for (int i = 0; i < pfArr.Length; i++)

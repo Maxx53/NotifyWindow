@@ -55,10 +55,10 @@
             // 
             // notifyWindow1
             // 
-            this.notifyWindow1.AnimSpeed = 7;
+            this.notifyWindow1.AnimSpeed = 25;
             this.notifyWindow1.BackImage = global::maxx53.tools.Properties.Resources.sample;
-            this.notifyWindow1.LifeTime = 2000;
-            this.notifyWindow1.MaxCount = 4;
+            this.notifyWindow1.LifeTime = 1000;
+            this.notifyWindow1.Transparency = 80;
             this.notifyWindow1.OnMouseDown += new System.Windows.Forms.MouseEventHandler(this.notifyWindow1_OnMouseDown);
             // 
             // DemoForm
