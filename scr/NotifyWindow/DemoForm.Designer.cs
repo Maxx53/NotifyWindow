@@ -55,7 +55,6 @@
             // 
             // notifyWindow1
             // 
-            this.notifyWindow1.AnimSpeed = 25;
             this.notifyWindow1.BackImage = global::maxx53.tools.Properties.Resources.sample;
             this.notifyWindow1.LifeTime = 1000;
             this.notifyWindow1.Transparency = 80;

@@ -91,7 +91,7 @@ namespace maxx53.tools
 
 
             public static int Time = 2000;
-            public static int AnimSpeed = 5;
+            public static int AnimSpeed = 25;
             public static int Transparency = 100;
 
             private const int frameDelay = 16;
@@ -127,6 +127,7 @@ namespace maxx53.tools
                 this.label.LinkClicked += new LinkClickedEventHandler(this.label_LinkClicked);
             }
 
+
             public void InitForm(Image _backImage, int pos, MouseEventHandler mouseDown)
             {
                 //Init
@@ -149,9 +150,10 @@ namespace maxx53.tools
                 }
 
                 formY = Screen.PrimaryScreen.WorkingArea.Height - this.Height - this.Height * pos;
-                AnimStep = this.Height / (200 / AnimSpeed);
+                var PrettySpeed = 200 / AnimSpeed;
+                AnimStep = this.Height / PrettySpeed;
                 OpacLevel = (double)Transparency / 100;
-                OpacStep = OpacLevel / (200 / AnimSpeed);
+                OpacStep = OpacLevel / (double)PrettySpeed;
 
                 this.Opacity = OpacLevel;
             }
@@ -206,10 +208,10 @@ namespace maxx53.tools
                 CloseAnimTimer.Start();
             }
 
-
             public void resetForm()
             {
                 this.Opacity = 0;
+                this.Visible = false;
                 this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, formY + this.Height);
 
                 CloseAnimTimer.Enabled = false;
@@ -307,6 +309,7 @@ namespace maxx53.tools
             set
             {
                 _maxCount = value;
+                CreateForms();
                 initialized = false;
             }
         }
@@ -332,11 +335,15 @@ namespace maxx53.tools
 
         private PopupForm[] pfArr;
         private bool initialized = false;
+        private int busyPos = -1;
 
         public NotifyWindow()
         {
-            //Create forms
+            CreateForms();
+        }
 
+        private void CreateForms()
+        {
             pfArr = new PopupForm[_maxCount];
 
             for (int i = 0; i < _maxCount; i++)
@@ -353,6 +360,7 @@ namespace maxx53.tools
             }
         }
 
+
         public void Show(string text, bool isRTF)
         {
             if (!initialized)
@@ -362,15 +370,32 @@ namespace maxx53.tools
             }
 
             int pos = 0;
+            bool isBusy = true;
 
             for (int i = 0; i < pfArr.Length; i++)
             {
                 if (pfArr[i].Visible == false)
                 {
                     pos = i;
+                    isBusy = false;
                     break;
                 }
             }
+
+            if (isBusy)
+            {
+                busyPos++;
+
+                if (busyPos == MaxCount)
+                {
+                    //reset count
+                    busyPos = 0;
+                }
+
+                pos = busyPos;
+            }
+            else busyPos = -1;
+
 
             pfArr[pos].resetForm();
 
