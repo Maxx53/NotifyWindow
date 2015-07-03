@@ -20,6 +20,7 @@ namespace maxx53.tools
                     base.ReadOnly = true;
                     base.BorderStyle = BorderStyle.None;
                     base.TabStop = false;
+                    base.ScrollBars = RichTextBoxScrollBars.None;
                     base.SetStyle(ControlStyles.Selectable, false);
                     this.SetStyle(ControlStyles.Opaque, true);
                     this.SetStyle(ControlStyles.OptimizedDoubleBuffer, false);
@@ -63,7 +64,7 @@ namespace maxx53.tools
 
             private Timer LiveTimer = new Timer();
            
-            public RichTextLabel label = new RichTextLabel();
+            private RichTextLabel label = new RichTextLabel();
 
             public string LabelText
             {
@@ -72,7 +73,8 @@ namespace maxx53.tools
                     return label.Text;
                 }
                 set
-                {
+                {   
+                    ClearRTF();
                     label.Text = value;
                 }
             }
@@ -85,9 +87,12 @@ namespace maxx53.tools
                 }
                 set
                 {
+                    ClearRTF();
                     label.Rtf = value;
                 }
             }
+
+            public string FormID { get; set; }
 
 
             public static int Time = 2000;
@@ -109,7 +114,6 @@ namespace maxx53.tools
                 this.OpenAnimTimer.Interval = frameDelay;
                 this.OpenAnimTimer.Tick += new System.EventHandler(this.OpenAnimTimer_Tick);
 
-                this.LiveTimer.Interval = Time;
                 this.LiveTimer.Tick += new System.EventHandler(this.LiveTimer_Tick);
 
                 this.CloseAnimTimer.Interval = frameDelay;
@@ -154,6 +158,8 @@ namespace maxx53.tools
                 AnimStep = this.Height / PrettySpeed;
                 OpacLevel = (double)Transparency / 100;
                 OpacStep = OpacLevel / (double)PrettySpeed;
+
+                this.LiveTimer.Interval = Time;
 
                 this.Opacity = OpacLevel;
             }
@@ -229,6 +235,13 @@ namespace maxx53.tools
             private void label_LinkClicked(object sender, LinkClickedEventArgs e)
             {
                 System.Diagnostics.Process.Start(e.LinkText);
+            }
+
+            private void ClearRTF()
+            {
+                //Clear RTF formating
+                label.Rtf = String.Empty;
+                label.Text = String.Empty;
             }
         }
         #endregion
@@ -360,8 +373,17 @@ namespace maxx53.tools
             }
         }
 
+        public void Show(string text)
+        {
+            Show(text, false, string.Empty);
+        }
 
         public void Show(string text, bool isRTF)
+        {
+            Show(text, isRTF, string.Empty);
+        }
+
+        public void Show(string text, bool isRTF, string id)
         {
             if (!initialized)
             {
@@ -404,6 +426,7 @@ namespace maxx53.tools
             else
                 pfArr[pos].LabelText = text;
 
+            pfArr[pos].FormID = id;
             pfArr[pos].Show();
 
         }
