@@ -129,6 +129,9 @@ namespace maxx53.tools
                 this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PopupForm_FormClosing);
                 this.label.Location = new System.Drawing.Point(12, 10);
                 this.label.LinkClicked += new LinkClickedEventHandler(this.label_LinkClicked);
+
+                //Win10 fix
+                this.DoubleBuffered = true;
             }
 
 
@@ -186,6 +189,9 @@ namespace maxx53.tools
             {
                 this.Opacity += OpacStep;
                 this.Location = new Point(this.Location.X, this.Location.Y - AnimStep);
+              
+                //Win10 Fix
+                this.Refresh();
 
                 if (this.Location.Y <= formY)
                 {
@@ -201,6 +207,9 @@ namespace maxx53.tools
             {
                 this.Opacity -= OpacStep;
                 this.Location = new Point(this.Location.X, this.Location.Y + AnimStep);
+
+                //Win10 Fix
+                this.Refresh();
 
                 if (this.Location.Y > formY + this.Height)
                 {
